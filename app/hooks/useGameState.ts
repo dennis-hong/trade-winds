@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { GAME_CONFIG, CITIES, GOODS } from '../constants/gameData';
+import { GAME_CONFIG, CITIES, GOODS, SHIPS, SHIP_UPGRADES } from '../constants/gameData';
 import {
   calculateInitialPrices,
   updatePricesWithRumors,
@@ -43,6 +43,10 @@ export function useGameState() {
   // 통계 추적
   const [tradeCount, setTradeCount] = useState(0);
   const [highestAssets, setHighestAssets] = useState(GAME_CONFIG.INITIAL_GOLD);
+
+  // 선박 시스템
+  const [currentShip, setCurrentShip] = useState('카라벨');
+  const [shipUpgrades, setShipUpgrades] = useState<string[]>([]);
 
   // UI 상태
   const [isClient, setIsClient] = useState(false);
@@ -136,8 +140,9 @@ export function useGameState() {
     }
 
     const currentAmount = inventory[good] || 0;
-    if (totalCargo + quantity > GAME_CONFIG.MAX_CARGO) {
-      showEvent('거래 실패', '선창 용량이 부족합니다!', 'danger');
+    const maxCargo = getEffectiveShipStats().maxCargo;
+    if (totalCargo + quantity > maxCargo) {
+      showEvent('거래 실패', `선창 용량이 부족합니다! (최대: ${maxCargo})`, 'danger');
       return false;
     }
 
@@ -204,12 +209,16 @@ export function useGameState() {
   const travel = useCallback((destination: string) => {
     const distance = CITIES[currentCity].distances[destination];
     const riskLevel = CITIES[currentCity].risk[destination];
-    const totalCost = calculateTravelCost(
+    const shipStats = getEffectiveShipStats();
+    
+    // 선박 속도에 따른 비용 조정
+    const baseCost = calculateTravelCost(
       distance,
       crew,
       GAME_CONFIG.TRAVEL_BASE_COST_PER_DISTANCE,
       GAME_CONFIG.TRAVEL_CREW_COST_PER_DISTANCE
     );
+    const totalCost = Math.round(baseCost * shipStats.speed);
 
     if (gold < totalCost) {
       showEvent('항해 불가', `여행 비용이 부족합니다! (필요: ${totalCost.toLocaleString()} 두카트)`, 'danger');
@@ -229,11 +238,18 @@ export function useGameState() {
       const eventRoll = Math.random();
 
       if (eventRoll < 0.3) {
-        // 해적 습격
-        const goldLoss = Math.round(gold * GAME_CONFIG.PIRATE_GOLD_LOSS_RATE);
-        setGold(prev => Math.max(0, prev - goldLoss));
-        showEvent('해적 습격!', `${goldLoss.toLocaleString()} 두카트를 빼앗겼습니다!`, 'danger');
-        addLog(`해적 습격! ${goldLoss.toLocaleString()} 두카트 손실`);
+        // 해적 습격 - 방어력에 따라 피해 감소 또는 격퇴
+        const defenseRoll = Math.random() * 100;
+        if (defenseRoll < shipStats.pirateDefense) {
+          // 해적 격퇴 성공!
+          showEvent('해적 격퇴!', `${currentShip}의 대포가 해적을 물리쳤습니다!`, 'success');
+          addLog(`해적 격퇴 성공! (방어력: ${shipStats.pirateDefense}%)`);
+        } else {
+          const goldLoss = Math.round(gold * GAME_CONFIG.PIRATE_GOLD_LOSS_RATE);
+          setGold(prev => Math.max(0, prev - goldLoss));
+          showEvent('해적 습격!', `${goldLoss.toLocaleString()} 두카트를 빼앗겼습니다!`, 'danger');
+          addLog(`해적 습격! ${goldLoss.toLocaleString()} 두카트 손실`);
+        }
       } else if (eventRoll < 0.6) {
         // 폭풍
         setShipCondition(prev => Math.max(0, prev - GAME_CONFIG.STORM_SHIP_DAMAGE));
@@ -323,18 +339,56 @@ export function useGameState() {
     return true;
   }, [gold, crew, showEvent, addLog]);
 
+  // 선박 유효 스탯 계산 (업그레이드 반영)
+  const getEffectiveShipStats = useCallback(() => {
+    const baseShip = SHIPS[currentShip];
+    let maxCargo = baseShip.maxCargo;
+    let speed = baseShip.speed;
+    let durability = baseShip.durability;
+    let pirateDefense = baseShip.pirateDefense;
+
+    // 업그레이드 효과 적용
+    shipUpgrades.forEach(upgradeId => {
+      const upgrade = SHIP_UPGRADES.find(u => u.id === upgradeId);
+      if (upgrade) {
+        switch (upgrade.effect.type) {
+          case 'cargo':
+            maxCargo += upgrade.effect.value;
+            break;
+          case 'speed':
+            speed += upgrade.effect.value;
+            break;
+          case 'durability':
+            durability += upgrade.effect.value;
+            break;
+          case 'pirateDefense':
+            pirateDefense += upgrade.effect.value;
+            break;
+        }
+      }
+    });
+
+    // 구리 도금은 내구도도 추가로 +20
+    if (shipUpgrades.includes('copper_plating')) {
+      durability += 20;
+    }
+
+    return { maxCargo, speed, durability, pirateDefense };
+  }, [currentShip, shipUpgrades]);
+
   // 최대 구매 수량 계산 (재고 고려)
   const getMaxBuyQuantity = useCallback((good: string) => {
+    const effectiveMaxCargo = getEffectiveShipStats().maxCargo;
     const maxByGoldAndCargo = calculateMaxBuyQuantity(
       good,
       gold,
       inventory,
       prices[currentCity],
-      GAME_CONFIG.MAX_CARGO
+      effectiveMaxCargo
     );
     const availableStock = cityStocks[currentCity]?.[good] ?? 0;
     return Math.min(maxByGoldAndCargo, availableStock);
-  }, [gold, inventory, prices, currentCity, cityStocks]);
+  }, [gold, inventory, prices, currentCity, cityStocks, getEffectiveShipStats]);
 
   // 현재 도시의 재고 가져오기
   const getCurrentCityStocks = useCallback(() => {
@@ -345,6 +399,64 @@ export function useGameState() {
   const getGoodMaxStock = useCallback((good: string) => {
     return getMaxStock(currentCity, good);
   }, [currentCity]);
+
+  // 선박 구매
+  const buyShip = useCallback((shipName: string) => {
+    const ship = SHIPS[shipName];
+    if (!ship) {
+      showEvent('구매 실패', '존재하지 않는 선박입니다.', 'danger');
+      return false;
+    }
+
+    if (gold < ship.price) {
+      showEvent('구매 실패', '두카트가 부족합니다!', 'danger');
+      return false;
+    }
+
+    // 현재 화물이 새 선박의 용량을 초과하는지 체크
+    if (totalCargo > ship.maxCargo) {
+      showEvent('구매 실패', `화물이 너무 많습니다! (현재: ${totalCargo}, 새 선박 용량: ${ship.maxCargo})`, 'danger');
+      return false;
+    }
+
+    setGold(prev => prev - ship.price);
+    setCurrentShip(shipName);
+    setShipCondition(ship.durability); // 새 선박은 최대 내구도
+    setShipUpgrades([]); // 업그레이드 초기화
+    addLog(`${ship.icon} ${shipName} 구매! (${ship.price.toLocaleString()} 두카트)`);
+    showEvent('선박 구매 완료!', `${shipName}의 새 주인이 되셨습니다!`, 'success');
+
+    return true;
+  }, [gold, totalCargo, showEvent, addLog]);
+
+  // 업그레이드 구매
+  const buyUpgrade = useCallback((upgradeId: string) => {
+    const upgrade = SHIP_UPGRADES.find(u => u.id === upgradeId);
+    if (!upgrade) {
+      showEvent('구매 실패', '존재하지 않는 업그레이드입니다.', 'danger');
+      return false;
+    }
+
+    if (shipUpgrades.includes(upgradeId)) {
+      showEvent('구매 실패', '이미 장착된 업그레이드입니다.', 'warning');
+      return false;
+    }
+
+    if (gold < upgrade.price) {
+      showEvent('구매 실패', '두카트가 부족합니다!', 'danger');
+      return false;
+    }
+
+    setGold(prev => prev - upgrade.price);
+    setShipUpgrades(prev => [...prev, upgradeId]);
+    addLog(`${upgrade.icon} ${upgrade.name} 업그레이드 장착!`);
+    showEvent('업그레이드 완료!', `${upgrade.name}을(를) 장착했습니다!`, 'success');
+
+    return true;
+  }, [gold, shipUpgrades, showEvent, addLog]);
+
+  // 실제 최대 적재량 (선박 + 업그레이드)
+  const effectiveMaxCargo = getEffectiveShipStats().maxCargo;
 
   return {
     // 상태
@@ -373,6 +485,11 @@ export function useGameState() {
     animateTradeCount,
     cityStocks,
 
+    // 선박 시스템
+    currentShip,
+    shipUpgrades,
+    effectiveMaxCargo,
+
     // 액션
     buyGood,
     sellGood,
@@ -382,6 +499,9 @@ export function useGameState() {
     getMaxBuyQuantity,
     getCurrentCityStocks,
     getGoodMaxStock,
-    showEvent
+    showEvent,
+    buyShip,
+    buyUpgrade,
+    getEffectiveShipStats
   };
 }

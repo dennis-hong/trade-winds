@@ -14,7 +14,8 @@ import {
   NavigationPanel,
   CargoPanel,
   LogPanel,
-  WorldMap
+  WorldMap,
+  ShipyardPanel
 } from './panels';
 import { MobileStatBar, MobileTabs, type TabType } from './ui';
 
@@ -241,6 +242,17 @@ export default function AgeOfSailGame() {
             </div>
           </>
         )}
+        {activeTab === 'shipyard' && (
+          <ShipyardPanel
+            currentCity={game.currentCity}
+            currentShip={game.currentShip}
+            shipUpgrades={game.shipUpgrades}
+            gold={game.gold}
+            onBuyShip={game.buyShip}
+            onBuyUpgrade={game.buyUpgrade}
+            getEffectiveShipStats={game.getEffectiveShipStats}
+          />
+        )}
         {activeTab === 'cargo' && (
           <>
             <CargoPanel
@@ -255,6 +267,19 @@ export default function AgeOfSailGame() {
             </div>
           </>
         )}
+      </div>
+
+      {/* 조선소 - 데스크탑 */}
+      <div className="hidden md:block mt-6">
+        <ShipyardPanel
+          currentCity={game.currentCity}
+          currentShip={game.currentShip}
+          shipUpgrades={game.shipUpgrades}
+          gold={game.gold}
+          onBuyShip={game.buyShip}
+          onBuyUpgrade={game.buyUpgrade}
+          getEffectiveShipStats={game.getEffectiveShipStats}
+        />
       </div>
 
       {/* 하단 섹션 - 데스크탑만 */}

@@ -1,8 +1,8 @@
 'use client';
 
-import { Store, ArrowRightLeft, Navigation, Package } from 'lucide-react';
+import { Store, ArrowRightLeft, Navigation, Package, Ship } from 'lucide-react';
 
-export type TabType = 'market' | 'trade' | 'navigate' | 'cargo';
+export type TabType = 'market' | 'trade' | 'navigate' | 'cargo' | 'shipyard';
 
 interface MobileTabsProps {
   activeTab: TabType;
@@ -13,6 +13,7 @@ const tabs = [
   { id: 'market' as TabType, label: '시장', icon: Store },
   { id: 'trade' as TabType, label: '거래', icon: ArrowRightLeft },
   { id: 'navigate' as TabType, label: '항해', icon: Navigation },
+  { id: 'shipyard' as TabType, label: '조선소', icon: Ship },
   { id: 'cargo' as TabType, label: '화물', icon: Package },
 ];
 

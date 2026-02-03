@@ -1,4 +1,4 @@
-import type { CityData, GoodData } from '../types';
+import type { CityData, GoodData, ShipData, ShipUpgrade } from '../types';
 
 // 도시 데이터
 export const CITIES: Record<string, CityData> = {
@@ -137,3 +137,94 @@ export const TITLES = [
   { threshold: TITLE_THRESHOLDS.APPRENTICE, title: '견습 상인', icon: '📜', color: 'text-green-400' },
   { threshold: 0, title: '초보 선원', icon: '⚓', color: 'text-gray-400' }
 ];
+
+// 선박 데이터
+export const SHIPS: Record<string, ShipData> = {
+  '카라벨': {
+    name: '카라벨',
+    icon: '⛵',
+    price: 0, // 기본 선박
+    maxCargo: 100,
+    speed: 1.0,
+    durability: 100,
+    pirateDefense: 10,
+    description: '가벼운 탐험선. 기동성이 좋지만 적재량이 적다.'
+  },
+  '카락선': {
+    name: '카락선',
+    icon: '🚢',
+    price: 15000,
+    maxCargo: 200,
+    speed: 1.2, // 20% 느림 (비용 증가)
+    durability: 150,
+    pirateDefense: 25,
+    description: '견고한 대형 상선. 적재량이 많고 내구성이 높다.'
+  },
+  '갤리온선': {
+    name: '갤리온선',
+    icon: '🛳️',
+    price: 35000,
+    maxCargo: 300,
+    speed: 1.1, // 10% 느림
+    durability: 200,
+    pirateDefense: 50,
+    description: '무장 상선의 왕. 대포를 탑재해 해적에게 강하다.'
+  },
+  '정크선': {
+    name: '정크선',
+    icon: '🚤',
+    price: 25000,
+    maxCargo: 250,
+    speed: 0.9, // 10% 빠름
+    durability: 120,
+    pirateDefense: 20,
+    description: '동양의 범선. 빠르고 효율적인 항해가 가능하다.'
+  }
+};
+
+// 선박 업그레이드
+export const SHIP_UPGRADES: ShipUpgrade[] = [
+  {
+    id: 'reinforced_hull',
+    name: '강화 선체',
+    icon: '🛡️',
+    price: 5000,
+    description: '선체를 강화하여 최대 내구도 +30',
+    effect: { type: 'durability', value: 30 }
+  },
+  {
+    id: 'extra_sails',
+    name: '추가 돛',
+    icon: '🎐',
+    price: 8000,
+    description: '돛을 추가하여 항해 속도 10% 증가',
+    effect: { type: 'speed', value: -0.1 }
+  },
+  {
+    id: 'expanded_hold',
+    name: '화물창 확장',
+    icon: '📦',
+    price: 10000,
+    description: '화물창을 확장하여 적재량 +50',
+    effect: { type: 'cargo', value: 50 }
+  },
+  {
+    id: 'cannons',
+    name: '대포 설치',
+    icon: '💣',
+    price: 12000,
+    description: '대포를 설치하여 해적 방어력 +20%',
+    effect: { type: 'pirateDefense', value: 20 }
+  },
+  {
+    id: 'copper_plating',
+    name: '구리 도금',
+    icon: '🔶',
+    price: 15000,
+    description: '선체 바닥을 구리로 도금하여 속도 15% 증가, 내구도 +20',
+    effect: { type: 'speed', value: -0.15 }
+  }
+];
+
+// 조선소가 있는 도시
+export const SHIPYARD_CITIES = ['리스본', '세비야', '베네치아', '중국'];

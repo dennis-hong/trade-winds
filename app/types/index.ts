@@ -51,6 +51,31 @@ export interface BestTradeInfo {
   bestProfit: number;
 }
 
+// 선박 타입
+export interface ShipData {
+  name: string;
+  icon: string;
+  price: number;
+  maxCargo: number;
+  speed: number;        // 1.0 = 기본, 낮을수록 빠름 (비용 배율)
+  durability: number;   // 최대 내구도
+  pirateDefense: number; // 해적 방어력 (0-100%)
+  description: string;
+}
+
+// 선박 업그레이드 타입
+export interface ShipUpgrade {
+  id: string;
+  name: string;
+  icon: string;
+  price: number;
+  description: string;
+  effect: {
+    type: 'speed' | 'cargo' | 'durability' | 'pirateDefense';
+    value: number;
+  };
+}
+
 // 게임 상태 타입
 export interface GameState {
   gold: number;
@@ -66,6 +91,9 @@ export interface GameState {
   rumors: Rumor[];
   tradeCount: number;
   highestAssets: number;
+  // 선박 시스템
+  currentShip: string;
+  shipUpgrades: string[];
 }
 
 // 게임 액션 타입

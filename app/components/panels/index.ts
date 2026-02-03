@@ -6,3 +6,4 @@ export { NavigationPanel } from './NavigationPanel';
 export { CargoPanel } from './CargoPanel';
 export { LogPanel } from './LogPanel';
 export { WorldMap } from './WorldMap';
+export { ShipyardPanel } from './ShipyardPanel';
