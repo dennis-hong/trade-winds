@@ -15,7 +15,8 @@ import {
   CargoPanel,
   LogPanel,
   WorldMap,
-  ShipyardPanel
+  ShipyardPanel,
+  QuestPanel
 } from './panels';
 import { MobileStatBar, MobileTabs, type TabType } from './ui';
 
@@ -242,6 +243,17 @@ export default function AgeOfSailGame() {
             </div>
           </>
         )}
+        {activeTab === 'quest' && (
+          <QuestPanel
+            quests={game.quests}
+            year={game.year}
+            month={game.month}
+            onClaimReward={game.claimQuestReward}
+            onAbandonQuest={game.abandonQuest}
+            onRefreshQuests={game.refreshQuests}
+            reputation={game.reputation}
+          />
+        )}
         {activeTab === 'shipyard' && (
           <ShipyardPanel
             currentCity={game.currentCity}
@@ -269,8 +281,8 @@ export default function AgeOfSailGame() {
         )}
       </div>
 
-      {/* 조선소 - 데스크탑 */}
-      <div className="hidden md:block mt-6">
+      {/* 조선소 & 퀘스트 - 데스크탑 */}
+      <div className="hidden md:grid md:grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         <ShipyardPanel
           currentCity={game.currentCity}
           currentShip={game.currentShip}
@@ -279,6 +291,15 @@ export default function AgeOfSailGame() {
           onBuyShip={game.buyShip}
           onBuyUpgrade={game.buyUpgrade}
           getEffectiveShipStats={game.getEffectiveShipStats}
+        />
+        <QuestPanel
+          quests={game.quests}
+          year={game.year}
+          month={game.month}
+          onClaimReward={game.claimQuestReward}
+          onAbandonQuest={game.abandonQuest}
+          onRefreshQuests={game.refreshQuests}
+          reputation={game.reputation}
         />
       </div>
 

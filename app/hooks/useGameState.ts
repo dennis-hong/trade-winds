@@ -23,7 +23,13 @@ import {
   getMaxStock,
   type CityStocks
 } from '../utils/stock';
-import type { Rumor, GameEvent } from '../types';
+import type { Rumor, GameEvent, Quest } from '../types';
+import {
+  generateInitialQuests,
+  generateQuest,
+  updateQuestProgress,
+  checkExpiredQuests
+} from '../utils/quest';
 
 export function useGameState() {
   // 기본 게임 상태
@@ -48,6 +54,10 @@ export function useGameState() {
   const [currentShip, setCurrentShip] = useState('카라벨');
   const [shipUpgrades, setShipUpgrades] = useState<string[]>([]);
 
+  // 퀘스트 시스템
+  const [quests, setQuests] = useState<Quest[]>([]);
+  const [reputation, setReputation] = useState(0);
+
   // UI 상태
   const [isClient, setIsClient] = useState(false);
   const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
@@ -65,6 +75,8 @@ export function useGameState() {
     setIsClient(true);
     setPrices(calculateInitialPrices(true));
     setCityStocks(initializeStocks());
+    // 초기 퀘스트 생성
+    setQuests(generateInitialQuests(GAME_CONFIG.INITIAL_YEAR, GAME_CONFIG.INITIAL_MONTH, '리스본'));
   }, []);
 
   // 총 자산 계산
@@ -158,6 +170,9 @@ export function useGameState() {
     setTimeout(() => setAnimateTradeCount(false), 300);
     addLog(`${GOODS[good].icon} ${good} ${quantity}개를 ${totalCost.toLocaleString()} 두카트에 구매`);
 
+    // 퀘스트 진행 업데이트
+    setQuests(prev => updateQuestProgress(prev, { type: 'buy', good, quantity }));
+
     return true;
   }, [gold, currentCity, prices, inventory, averagePrices, totalCargo, cityStocks, showEvent, addLog]);
 
@@ -201,6 +216,9 @@ export function useGameState() {
     if (profit > 0) {
       showEvent('거래 성공', `${profit.toLocaleString()} 두카트의 이익!`, 'success');
     }
+
+    // 퀘스트 진행 업데이트 (판매, 배달 퀘스트 포함)
+    setQuests(prev => updateQuestProgress(prev, { type: 'sell', good, quantity, city: currentCity }));
 
     return true;
   }, [inventory, prices, currentCity, averagePrices, showEvent, addLog]);
@@ -291,6 +309,14 @@ export function useGameState() {
 
     updatePrices();
     addLog(`${destination}에 도착 (${distance}개월, ${totalCost.toLocaleString()} 두카트)`);
+
+    // 퀘스트 진행 업데이트 (탐험 퀘스트)
+    setQuests(prev => {
+      let updated = updateQuestProgress(prev, { type: 'travel', city: destination });
+      // 만료된 퀘스트 체크
+      updated = checkExpiredQuests(updated, newYear, newMonth);
+      return updated;
+    });
 
     return true;
   }, [currentCity, crew, gold, shipCondition, month, year, showEvent, addLog, updatePrices]);
@@ -458,6 +484,63 @@ export function useGameState() {
   // 실제 최대 적재량 (선박 + 업그레이드)
   const effectiveMaxCargo = getEffectiveShipStats().maxCargo;
 
+  // 퀘스트 보상 수령
+  const claimQuestReward = useCallback((questId: string) => {
+    const quest = quests.find(q => q.id === questId);
+    if (!quest || quest.status !== 'completed') {
+      showEvent('보상 수령 실패', '완료되지 않은 의뢰입니다.', 'danger');
+      return false;
+    }
+
+    // 보상 지급
+    if (quest.reward.gold) {
+      setGold(prev => prev + quest.reward.gold!);
+    }
+    if (quest.reward.reputation) {
+      setReputation(prev => prev + quest.reward.reputation!);
+    }
+
+    // 퀘스트 제거
+    setQuests(prev => prev.filter(q => q.id !== questId));
+    
+    addLog(`📜 의뢰 완료! "${quest.name}" (보상: ${quest.reward.gold?.toLocaleString() || 0}G)`);
+    showEvent('의뢰 완료!', `${quest.reward.gold?.toLocaleString() || 0} 두카트와 명성 ${quest.reward.reputation || 0}을(를) 획득했습니다!`, 'success');
+
+    return true;
+  }, [quests, showEvent, addLog]);
+
+  // 퀘스트 포기
+  const abandonQuest = useCallback((questId: string) => {
+    setQuests(prev => prev.filter(q => q.id !== questId));
+    addLog('📜 의뢰를 포기했습니다.');
+    showEvent('의뢰 포기', '의뢰를 포기했습니다. 명성이 약간 감소합니다.', 'warning');
+    setReputation(prev => Math.max(0, prev - 5));
+    return true;
+  }, [showEvent, addLog]);
+
+  // 새 퀘스트 추가
+  const refreshQuests = useCallback(() => {
+    const activeCount = quests.filter(q => q.status === 'active').length;
+    if (activeCount >= 5) {
+      showEvent('의뢰 제한', '진행 중인 의뢰가 너무 많습니다! (최대 5개)', 'warning');
+      return false;
+    }
+
+    const newQuest = generateQuest(year, month, currentCity, quests.map(q => q.id));
+    setQuests(prev => [...prev, newQuest]);
+    addLog(`📜 새 의뢰: "${newQuest.name}"`);
+    showEvent('새 의뢰!', `${newQuest.giver}의 의뢰가 도착했습니다!`, 'success');
+
+    return true;
+  }, [quests, year, month, currentCity, showEvent, addLog]);
+
+  // 자산 변경 시 퀘스트 업데이트 (부 축적 퀘스트)
+  useEffect(() => {
+    if (isClient) {
+      setQuests(prev => updateQuestProgress(prev, { type: 'assets', totalAssets }));
+    }
+  }, [totalAssets, isClient]);
+
   return {
     // 상태
     gold,
@@ -490,6 +573,10 @@ export function useGameState() {
     shipUpgrades,
     effectiveMaxCargo,
 
+    // 퀘스트 시스템
+    quests,
+    reputation,
+
     // 액션
     buyGood,
     sellGood,
@@ -502,6 +589,9 @@ export function useGameState() {
     showEvent,
     buyShip,
     buyUpgrade,
-    getEffectiveShipStats
+    getEffectiveShipStats,
+    claimQuestReward,
+    abandonQuest,
+    refreshQuests
   };
 }

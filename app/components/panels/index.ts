@@ -7,3 +7,4 @@ export { CargoPanel } from './CargoPanel';
 export { LogPanel } from './LogPanel';
 export { WorldMap } from './WorldMap';
 export { ShipyardPanel } from './ShipyardPanel';
+export { QuestPanel } from './QuestPanel';

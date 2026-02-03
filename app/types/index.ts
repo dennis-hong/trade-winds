@@ -96,6 +96,9 @@ export interface GameState {
   shipUpgrades: string[];
 }
 
+// Quest types - export from separate file
+export * from './quest';
+
 // 게임 액션 타입
 export type GameAction =
   | { type: 'BUY_GOOD'; good: string; quantity: number; price: number }
