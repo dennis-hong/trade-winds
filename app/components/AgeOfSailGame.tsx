@@ -13,7 +13,8 @@ import {
   TradingPanel,
   NavigationPanel,
   CargoPanel,
-  LogPanel
+  LogPanel,
+  WorldMap
 } from './panels';
 import { MobileStatBar, MobileTabs, type TabType } from './ui';
 
@@ -134,6 +135,16 @@ export default function AgeOfSailGame() {
       {/* 모바일 탭 네비게이션 */}
       <MobileTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
+      {/* 월드맵 - 데스크탑 */}
+      <div className="hidden md:block mb-6">
+        <WorldMap
+          currentCity={game.currentCity}
+          gold={game.gold}
+          crew={game.crew}
+          onTravel={game.travel}
+        />
+      </div>
+
       {/* 메인 컨텐츠 - 데스크탑 */}
       <div className="hidden md:grid md:grid-cols-1 lg:grid-cols-3 gap-6">
         <MarketPanel
@@ -210,15 +221,25 @@ export default function AgeOfSailGame() {
           />
         )}
         {activeTab === 'navigate' && (
-          <NavigationPanel
-            currentCity={game.currentCity}
-            crew={game.crew}
-            gold={game.gold}
-            inventory={game.inventory}
-            averagePrices={game.averagePrices}
-            prices={game.prices}
-            onTravel={game.travel}
-          />
+          <>
+            <WorldMap
+              currentCity={game.currentCity}
+              gold={game.gold}
+              crew={game.crew}
+              onTravel={game.travel}
+            />
+            <div className="mt-4">
+              <NavigationPanel
+                currentCity={game.currentCity}
+                crew={game.crew}
+                gold={game.gold}
+                inventory={game.inventory}
+                averagePrices={game.averagePrices}
+                prices={game.prices}
+                onTravel={game.travel}
+              />
+            </div>
+          </>
         )}
         {activeTab === 'cargo' && (
           <>
