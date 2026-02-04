@@ -20,20 +20,20 @@ const tabs = [
 
 export function MobileTabs({ activeTab, onTabChange }: MobileTabsProps) {
   return (
-    <div className="md:hidden sticky top-0 z-40 -mx-4 px-4 py-2 bg-[#0c1929]/95 backdrop-blur-sm border-b border-[#c9a227]/30 mb-4">
+    <div className="md:hidden sticky top-0 z-40 -mx-3 px-1.5 py-1.5 bg-[#0c1929]/95 backdrop-blur-sm border-b border-[#c9a227]/30 mb-3">
       <div className="flex justify-around">
         {tabs.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             onClick={() => onTabChange(id)}
-            className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg transition-all ${
+            className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center px-2 py-1 rounded-lg transition-all ${
               activeTab === id
-                ? 'bg-[#c9a227]/20 text-[#c9a227]'
-                : 'text-[#d4c49c] hover:text-[#c9a227]'
+                ? 'bg-[#c9a227]/20 text-[#c9a227] border border-[#c9a227]/40'
+                : 'text-[#d4c49c]/70 active:bg-[#c9a227]/10'
             }`}
           >
-            <Icon className="w-5 h-5" />
-            <span className="text-xs font-medium">{label}</span>
+            <Icon className="w-4.5 h-4.5" strokeWidth={activeTab === id ? 2.5 : 2} />
+            <span className={`text-[10px] leading-tight ${activeTab === id ? 'font-bold' : 'font-medium'}`}>{label}</span>
           </button>
         ))}
       </div>

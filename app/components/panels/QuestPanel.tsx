@@ -46,10 +46,10 @@ export function QuestPanel({
   };
 
   return (
-    <div className="ocean-card rounded-xl p-4">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
-          <Scroll className="w-6 h-6" />
+    <div className="ocean-card rounded-xl p-3 md:p-4">
+      <div className="flex items-center justify-between mb-3 md:mb-4">
+        <h2 className="text-lg md:text-2xl font-bold flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
+          <Scroll className="w-5 h-5 md:w-6 md:h-6" />
           의뢰 현황
         </h2>
         <div className="flex items-center gap-2">
@@ -59,7 +59,7 @@ export function QuestPanel({
           </div>
           <button
             onClick={onRefreshQuests}
-            className="p-2 rounded-lg bg-[#1a3a52] hover:bg-[#2d5a87] text-[#c9a227] transition-colors"
+            className="p-2.5 rounded-lg bg-[#1a3a52] active:bg-[#2d5a87] text-[#c9a227] transition-colors min-h-[40px] min-w-[40px] flex items-center justify-center"
             title="새 의뢰 확인"
           >
             <RefreshCw className="w-4 h-4" />
@@ -68,23 +68,23 @@ export function QuestPanel({
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-3 md:mb-4">
         <button
           onClick={() => setActiveTab('active')}
-          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-h-[44px] py-2 px-3 md:px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95 flex items-center justify-center gap-1 md:gap-2 ${
             activeTab === 'active'
               ? 'bg-[#c9a227] text-[#0c1929]'
-              : 'bg-[#1a3a52] text-[#d4c49c] hover:bg-[#2d5a87]'
+              : 'bg-[#1a3a52] text-[#d4c49c] active:bg-[#2d5a87]'
           }`}
         >
           📋 진행 중 ({activeQuests.length})
         </button>
         <button
           onClick={() => setActiveTab('completed')}
-          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all flex items-center justify-center gap-2 ${
+          className={`flex-1 min-h-[44px] py-2 px-3 md:px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95 flex items-center justify-center gap-1 md:gap-2 ${
             activeTab === 'completed'
               ? 'bg-[#c9a227] text-[#0c1929]'
-              : 'bg-[#1a3a52] text-[#d4c49c] hover:bg-[#2d5a87]'
+              : 'bg-[#1a3a52] text-[#d4c49c] active:bg-[#2d5a87]'
           }`}
         >
           ✅ 완료 ({completedQuests.length})
@@ -206,7 +206,7 @@ export function QuestPanel({
                       </div>
                       <button
                         onClick={() => onClaimReward(quest.id)}
-                        className="flex items-center gap-1 px-3 py-1 rounded bg-green-500 text-white font-bold text-sm hover:bg-green-400"
+                        className="flex items-center gap-1 px-3 py-2 rounded bg-green-500 text-white font-bold text-sm active:bg-green-400 min-h-[40px] active:scale-95 transition-transform"
                       >
                         <Gift className="w-4 h-4" />
                         보상 받기

@@ -38,14 +38,14 @@ export function ShipyardPanel({
   if (!hasShipyard) {
     return (
       <div className="ocean-card rounded-xl p-4">
-        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
-          <Ship className="w-6 h-6" />
+        <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
+          <Ship className="w-5 h-5 md:w-6 md:h-6" />
           조선소
         </h2>
-        <div className="text-center py-8 text-[#8b9dc3]">
-          <Ship className="w-16 h-16 mx-auto mb-4 opacity-50" />
-          <p className="text-lg">이 도시에는 조선소가 없습니다</p>
-          <p className="text-sm mt-2">
+        <div className="text-center py-6 md:py-8 text-[#8b9dc3]">
+          <Ship className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 opacity-50" />
+          <p className="text-base md:text-lg">이 도시에는 조선소가 없습니다</p>
+          <p className="text-xs md:text-sm mt-2">
             조선소가 있는 도시: {SHIPYARD_CITIES.join(', ')}
           </p>
         </div>
@@ -54,9 +54,9 @@ export function ShipyardPanel({
   }
 
   return (
-    <div className="ocean-card rounded-xl p-4">
-      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
-        <Ship className="w-6 h-6" />
+    <div className="ocean-card rounded-xl p-3 md:p-4">
+      <h2 className="text-lg md:text-2xl font-bold mb-3 md:mb-4 flex items-center gap-2 text-[#c9a227] border-b-2 border-[#2d5a87] pb-2">
+        <Ship className="w-5 h-5 md:w-6 md:h-6" />
         {currentCity} 조선소
       </h2>
 
@@ -100,23 +100,23 @@ export function ShipyardPanel({
       </div>
 
       {/* 탭 */}
-      <div className="flex gap-2 mb-4">
+      <div className="flex gap-2 mb-3 md:mb-4">
         <button
           onClick={() => setActiveTab('ships')}
-          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+          className={`flex-1 min-h-[44px] py-2 px-3 md:px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95 ${
             activeTab === 'ships'
               ? 'bg-[#c9a227] text-[#0c1929]'
-              : 'bg-[#1a3a52] text-[#d4c49c] hover:bg-[#2d5a87]'
+              : 'bg-[#1a3a52] text-[#d4c49c] active:bg-[#2d5a87]'
           }`}
         >
           🚢 선박 구매
         </button>
         <button
           onClick={() => setActiveTab('upgrades')}
-          className={`flex-1 py-2 px-4 rounded-lg font-bold transition-all ${
+          className={`flex-1 min-h-[44px] py-2 px-3 md:px-4 rounded-lg font-bold text-sm md:text-base transition-all active:scale-95 ${
             activeTab === 'upgrades'
               ? 'bg-[#c9a227] text-[#0c1929]'
-              : 'bg-[#1a3a52] text-[#d4c49c] hover:bg-[#2d5a87]'
+              : 'bg-[#1a3a52] text-[#d4c49c] active:bg-[#2d5a87]'
           }`}
         >
           🔧 업그레이드
@@ -159,7 +159,7 @@ export function ShipyardPanel({
                     <button
                       onClick={() => onBuyShip(name)}
                       disabled={!canAfford}
-                      className={`px-3 py-1 rounded text-sm font-bold ${
+                      className={`px-3 py-1.5 rounded text-sm font-bold min-h-[40px] min-w-[40px] active:scale-95 transition-transform ${
                         canAfford
                           ? 'bg-[#c9a227] text-[#0c1929] hover:bg-[#e0b82e]'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'
@@ -228,7 +228,7 @@ export function ShipyardPanel({
                     <button
                       onClick={() => onBuyUpgrade(upgrade.id)}
                       disabled={!canAfford}
-                      className={`px-3 py-1 rounded text-sm font-bold ${
+                      className={`px-3 py-1.5 rounded text-sm font-bold min-h-[40px] min-w-[40px] active:scale-95 transition-transform ${
                         canAfford
                           ? 'bg-[#c9a227] text-[#0c1929] hover:bg-[#e0b82e]'
                           : 'bg-gray-600 text-gray-400 cursor-not-allowed'

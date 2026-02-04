@@ -84,7 +84,7 @@ export default function AgeOfSailGame() {
   }
 
   return (
-    <div className="min-h-screen p-4 md:p-6">
+    <div className="min-h-screen px-3 py-2 md:p-6">
       {/* 모달들 */}
       {showTutorial && <TutorialModal onClose={() => setShowTutorial(false)} />}
 
@@ -99,16 +99,16 @@ export default function AgeOfSailGame() {
         <EventModal event={game.currentEvent} />
       )}
 
-      {/* 헤더 */}
-      <header className="text-center mb-6">
-        <div className="flex items-center justify-center gap-3 mb-2">
-          <Compass className="w-10 h-10 text-[#c9a227] animate-wave" />
-          <h1 className="text-4xl md:text-5xl font-bold text-[#c9a227] title-fancy">
+      {/* 헤더 - 모바일에서 콤팩트 */}
+      <header className="text-center mb-3 md:mb-6">
+        <div className="flex items-center justify-center gap-2 md:gap-3 mb-1 md:mb-2">
+          <Compass className="w-6 h-6 md:w-10 md:h-10 text-[#c9a227] animate-wave" />
+          <h1 className="text-2xl md:text-5xl font-bold text-[#c9a227] title-fancy">
             대항해시대
           </h1>
-          <Ship className="w-10 h-10 text-[#c9a227] animate-wave" style={{ animationDelay: '0.5s' }} />
+          <Ship className="w-6 h-6 md:w-10 md:h-10 text-[#c9a227] animate-wave" style={{ animationDelay: '0.5s' }} />
         </div>
-        <p className="text-[#d4c49c] text-lg">Merchant Oracle - 위험을 무릅쓰고 부를 축적하라</p>
+        <p className="text-[#d4c49c] text-xs md:text-lg hidden md:block">Merchant Oracle - 위험을 무릅쓰고 부를 축적하라</p>
       </header>
 
       {/* 상태 헤더 */}
@@ -200,6 +200,10 @@ export default function AgeOfSailGame() {
             onSelectGood={setSelectedGood}
             stocks={game.getCurrentCityStocks()}
             getMaxStock={game.getGoodMaxStock}
+            onGoToTrade={(good) => {
+              setSelectedGood(good);
+              setActiveTab('trade');
+            }}
           />
         )}
         {activeTab === 'trade' && (
@@ -220,6 +224,7 @@ export default function AgeOfSailGame() {
             onSellAll={handleSellAll}
             onRepairShip={game.repairShip}
             onHireCrew={game.hireCrew}
+            onBackToMarket={() => setActiveTab('market')}
           />
         )}
         {activeTab === 'navigate' && (
@@ -316,7 +321,7 @@ export default function AgeOfSailGame() {
       </div>
 
       {/* 푸터 */}
-      <footer className="text-center mt-8 mb-16 md:mb-0 text-[#8b6914] text-sm">
+      <footer className="text-center mt-4 md:mt-8 mb-14 md:mb-0 text-[#8b6914] text-[10px] md:text-sm">
         <p>Trade Winds - Age of Sail Trading Game</p>
       </footer>
 
@@ -325,6 +330,9 @@ export default function AgeOfSailGame() {
         gold={game.gold}
         totalAssets={game.totalAssets}
         titleIcon={game.titleInfo.icon}
+        currentCity={game.currentCity}
+        totalCargo={game.totalCargo}
+        maxCargo={100}
       />
     </div>
   );
